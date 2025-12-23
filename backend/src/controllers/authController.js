@@ -7,7 +7,7 @@ import { successHandler } from "../utils/successHandler.js";
 export const register = async (req, res) => {
   // #swagger.tags = ['auth']
   try {
-    const { name, email, password } = req.body;
+    const { name, email, gender, password } = req.body;
     if (
       !password.match(
         /(?=[A-Za-z0-9@#$%^&+!=]+$)^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+!=])(?=.{8,}).*$/
@@ -27,6 +27,7 @@ export const register = async (req, res) => {
     const newUser = await User.create({
       name,
       email,
+      gender,
       password,
     });
     newUser.save();

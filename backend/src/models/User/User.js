@@ -26,15 +26,20 @@ const userSchema = new Schema(
     password: {
       type: String,
     },
+    gender: {
+      type: String,
+      enum: ["bride", "groom", "other"],
+      default: "other",
+    },
     role: {
       type: String,
-      enum: ["user", "admin"],
+      enum: ["user", "vendor", "admin"],
       default: "user",
     },
     auth: {
       type: String,
-      default: "app",
       enum: ["app", "google", "apple"],
+      default: "app",
     },
     profilePic: {
       type: String,
