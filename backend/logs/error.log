@@ -1,0 +1,2 @@
+{"date":"2023-12-28T07:42:32.166Z","level":"error","message":"Invalid credentials","method":"POST","service":"user-service","url":"/login"}
+{"date":"2023-12-28T07:47:30.279Z","level":"error","message":"The Requested Route localhost/login Not Found","method":"POST","service":"user-service","url":"/login"}
