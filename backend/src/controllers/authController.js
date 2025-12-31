@@ -7,7 +7,8 @@ import { successHandler } from "../utils/successHandler.js";
 export const register = async (req, res) => {
   // #swagger.tags = ['auth']
   try {
-    const { name, email, gender, password } = req.body;
+    const { first_name, last_name, email, gender, password } = req.body;
+
     if (
       !password.match(
         /(?=[A-Za-z0-9@#$%^&+!=]+$)^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+!=])(?=.{8,}).*$/
@@ -20,17 +21,24 @@ export const register = async (req, res) => {
         res
       );
     }
+
     const user = await User.findOne({ email });
+
     if (user) {
       return errorHandler("User already exists", 400, req, res);
     }
+
     const newUser = await User.create({
-      name,
+      first_name,
+      last_name,
       email,
       gender,
       password,
+      emailVerified: true,
     });
+
     newUser.save();
+
     return successHandler("User created successfully", null, 200, res);
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
@@ -100,13 +108,16 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select("+password");
+
     if (!user) {
-      return errorHandler("User does not exist", req, 400, res);
+      return errorHandler("User does not exist", 400, req, res);
     }
+
     const isMatch = await user.comparePassword(password);
     if (!isMatch) {
       return errorHandler("Invalid credentials", 400, req, res);
     }
+
     if (!user.emailVerified) {
       return errorHandler("Email not verified", 400, req, res);
     }

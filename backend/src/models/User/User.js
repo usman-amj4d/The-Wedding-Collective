@@ -9,7 +9,11 @@ dotenv.config({ path: ".././src/config/config.env" });
 
 const userSchema = new Schema(
   {
-    name: {
+    first_name: {
+      type: String,
+      required: true,
+    },
+    last_name: {
       type: String,
       required: true,
     },

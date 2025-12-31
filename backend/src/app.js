@@ -7,7 +7,7 @@ import loggerMiddleware from "./middleware/loggerMiddleware.js";
 import swaggerUi from "swagger-ui-express";
 
 // ? Generated Swagger file
-import * as swaggerFile from "../swagger_output.json" assert { type: "json" };
+import * as swaggerFile from "../swagger_output.json" with { type: "json" };
 
 // ? Middlewares
 const app = express();
