@@ -7,7 +7,7 @@ import { successHandler } from "../utils/successHandler.js";
 export const register = async (req, res) => {
   // #swagger.tags = ['auth']
   try {
-    const { first_name, last_name, email, gender, password } = req.body;
+    const { first_name, last_name, email, gender, role, password } = req.body;
 
     if (
       !password.match(
@@ -33,6 +33,7 @@ export const register = async (req, res) => {
       last_name,
       email,
       gender,
+      role,
       password,
       emailVerified: true,
     });

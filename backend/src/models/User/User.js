@@ -32,18 +32,22 @@ const userSchema = new Schema(
     },
     gender: {
       type: String,
-      enum: ["bride", "groom", "other"],
+      enum: ["bride", "groom", "male", "female", "other"],
       default: "other",
     },
     role: {
       type: String,
-      enum: ["user", "vendor", "admin"],
+      enum: ["couple", "vendor", "admin"],
       default: "user",
     },
     auth: {
       type: String,
       enum: ["app", "google", "apple"],
       default: "app",
+    },
+    location: {
+      type: String,
+      default: "",
     },
     profilePic: {
       type: String,

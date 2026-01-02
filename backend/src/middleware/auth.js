@@ -75,3 +75,22 @@ export const userAuth = async (req, res, next) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// ? check if the role is user
+export const isVendor = async (req, res, next) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: "Not logged in" });
+    }
+    if (req.user.role !== "vendor") {
+      return res.status(401).json({
+        success: false,
+        message:
+          "You're not a vendor. You don't have the permissions to access this route",
+      });
+    }
+    next();
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

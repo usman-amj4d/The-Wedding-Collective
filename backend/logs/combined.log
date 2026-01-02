@@ -137,3 +137,19 @@
 {"date":"2025-12-31T19:13:32.856Z","level":"error","message":"User validation failed: name: Path `name` is required.","method":"POST","service":"user-service","url":"/register"}
 {"date":"2025-12-31T19:15:53.500Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/register"}
 {"date":"2025-12-31T19:16:49.339Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:34:26.135Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:36:19.122Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:38:27.903Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:39:20.428Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:39:46.320Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:40:12.469Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:40:16.717Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:40:58.818Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:41:11.518Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:41:16.498Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:41:27.294Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:41:43.644Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:42:04.736Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:42:50.197Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:43:15.655Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2025-12-31T19:43:38.136Z","level":"info","message":"Request received","method":"GET","service":"user-service","url":"/user/details"}
