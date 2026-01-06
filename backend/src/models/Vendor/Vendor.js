@@ -33,12 +33,16 @@ const vendorSchema = new Schema(
     average_rating: { type: Number, default: 0 },
     packages: [
       {
+        package_id: { type: mongoose.Schema.Types.ObjectId, auto: true },
         package_name: { type: String, required: true },
         price: { type: Number, required: true },
         features: { type: [String], required: true },
         description: { type: String },
+        cover_photo: { type: String, default: "" },
       },
     ],
+    photos: { type: [String], default: [] },
+    videos: { type: [String], default: [] },
     createdAt: {
       type: Date,
       default: Date.now,

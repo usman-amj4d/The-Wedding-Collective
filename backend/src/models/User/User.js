@@ -49,27 +49,27 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
-    profilePic: {
+    profile_pic: {
       type: String,
       default: "",
     },
-    emailVerified: {
+    email_verified: {
       type: Boolean,
       default: false,
     },
-    emailVerificationToken: {
+    email_verification_token: {
       type: Number,
     },
-    emailVerificationTokenExpires: {
+    email_verification_token_expires: {
       type: Date,
     },
-    passwordResetToken: {
+    password_reset_token: {
       type: Number,
     },
-    passwordResetTokenExpires: {
+    password_reset_token_expires: {
       type: Date,
     },
-    isActive: {
+    is_active: {
       type: Boolean,
       default: true,
     },
