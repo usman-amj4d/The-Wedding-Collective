@@ -49,7 +49,7 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
-    profile_pic: {
+    profile_photo: {
       type: String,
       default: "",
     },
