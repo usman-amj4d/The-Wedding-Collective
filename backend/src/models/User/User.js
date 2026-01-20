@@ -9,11 +9,11 @@ dotenv.config({ path: ".././src/config/config.env" });
 
 const userSchema = new Schema(
   {
-    first_name: {
+    firstName: {
       type: String,
       required: true,
     },
-    last_name: {
+    lastName: {
       type: String,
       required: true,
     },
@@ -49,27 +49,27 @@ const userSchema = new Schema(
       type: String,
       default: "",
     },
-    profile_photo: {
+    profilePhoto: {
       type: String,
       default: "",
     },
-    email_verified: {
+    emailVerified: {
       type: Boolean,
       default: false,
     },
-    email_verification_token: {
+    emailVerificationToken: {
       type: Number,
     },
-    email_verification_token_expires: {
+    emailVerificationTokenExpires: {
       type: Date,
     },
-    password_reset_token: {
+    passwordResetToken: {
       type: Number,
     },
-    password_reset_token_expires: {
+    passwordResetTokenExpires: {
       type: Date,
     },
-    is_active: {
+    isActive: {
       type: Boolean,
       default: true,
     },

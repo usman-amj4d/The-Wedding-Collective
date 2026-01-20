@@ -6,8 +6,8 @@ import { successHandler } from "../utils/successHandler.js";
 export const getBookingDetails = async (req, res) => {
   // #swagger.tags = ['booking']
   try {
-    const { booking_id } = req.params;
-    const booking = await Booking.findOne({ booking_id });
+    const { bookingId } = req.params;
+    const booking = await Booking.findOne({ bookingId });
     return successHandler(
       "Booking details fetched successfully",
       booking,
@@ -42,8 +42,8 @@ export const updateBooking = async (req, res) => {
   // #swagger.tags = ['booking']
   try {
     const updatedData = req.body;
-    const { booking_id } = req.params;
-    const booking = await Booking.findByIdAndUpdate(booking_id, updatedData, {
+    const { bookingId } = req.params;
+    const booking = await Booking.findByIdAndUpdate(bookingId, updatedData, {
       new: true,
       runValidators: true,
     });
@@ -62,9 +62,9 @@ export const updateBooking = async (req, res) => {
 export const cancelBooking = async (req, res) => {
   // #swagger.tags = ['booking']
   try {
-    const { booking_id } = req.params;
+    const { bookingId } = req.params;
     const booking = await Booking.findByIdAndUpdate(
-      booking_id,
+      bookingId,
       { isCancelled: true },
       {
         new: true,

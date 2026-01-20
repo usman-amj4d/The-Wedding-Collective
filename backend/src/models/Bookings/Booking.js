@@ -2,27 +2,27 @@ const mongoose = require("mongoose");
 
 const bookingSchema = new mongoose.Schema(
   {
-    booking_id: {
+    bookingId: {
       type: String,
       unique: true,
       required: true,
     },
-    user_id: {
+    userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    vendor_id: {
+    vendorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
       required: true,
     },
-    package_id: {
+    packageId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "Vendor.packages.package_id",
+      ref: "Vendor.packages.packageId",
       required: true,
     },
-    event_date: {
+    eventDate: {
       type: Date,
       required: true,
     },
@@ -38,7 +38,7 @@ const bookingSchema = new mongoose.Schema(
     notes: {
       type: String,
     },
-    payment_status: {
+    paymentStatus: {
       type: String,
       enum: ["unpaid", "partial", "paid"],
       default: "unpaid",

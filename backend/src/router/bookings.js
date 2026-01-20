@@ -5,7 +5,7 @@ const router = express.Router();
 
 // ? GET
 router
-  .route("/:booking_id")
+  .route("/:bookingId")
   .get(isAuthenticated, bookingsController.getBookingDetails);
 
 // ? POST
@@ -13,12 +13,12 @@ router.route("/create").post(isAuthenticated, bookingsController.createBooking);
 
 // ? PUT
 router
-  .route("/:booking_id")
+  .route("/:bookingId")
   .put(isAuthenticated, bookingsController.updateBooking);
 
 // ? PUT
 router
-  .route("/:booking_id/cancel")
+  .route("/:bookingId/cancel")
   .put(isAuthenticated, bookingsController.cancelBooking);
 
 export default router;

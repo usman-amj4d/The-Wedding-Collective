@@ -6,8 +6,8 @@ import { successHandler } from "../utils/successHandler.js";
 export const getVendorDetails = async (req, res) => {
   // #swagger.tags = ['vendor']
   try {
-    const { vendor_id } = req.params;
-    const vendor = await Vendor.findOne({ vendor_id: vendor_id });
+    const { vendorId } = req.params;
+    const vendor = await Vendor.findOne({ vendorId: vendorId });
     return successHandler(
       "Vendor details fetched successfully",
       vendor,
@@ -42,8 +42,8 @@ export const updateVendorDetails = async (req, res) => {
   // #swagger.tags = ['vendor']
   try {
     const updatedData = req.body;
-    const { vendor_id } = req.params;
-    const vendor = await Vendor.findByIdAndUpdate(vendor_id, updatedData, {
+    const { vendorId } = req.params;
+    const vendor = await Vendor.findByIdAndUpdate(vendorId, updatedData, {
       new: true,
       runValidators: true,
     });

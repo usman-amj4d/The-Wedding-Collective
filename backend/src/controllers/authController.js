@@ -7,7 +7,7 @@ import { successHandler } from "../utils/successHandler.js";
 export const register = async (req, res) => {
   // #swagger.tags = ['auth']
   try {
-    const { first_name, last_name, email, gender, role, password } = req.body;
+    const { firstName, lastName, email, gender, role, password } = req.body;
 
     if (
       !password.match(
@@ -29,8 +29,8 @@ export const register = async (req, res) => {
     }
 
     const newUser = await User.create({
-      first_name,
-      last_name,
+      firstName,
+      lastName,
       email,
       gender,
       role,
@@ -52,14 +52,17 @@ export const requestEmailToken = async (req, res) => {
   try {
     const { email } = req.body;
     const user = await User.findOne({ email });
+
     if (!user) {
       return errorHandler("User does not exist", 400, req, res);
     }
+
     const emailVerificationToken = Math.floor(100000 + Math.random() * 900000);
     const emailVerificationTokenExpires = new Date(Date.now() + 10 * 60 * 1000);
     user.emailVerificationToken = emailVerificationToken;
     user.emailVerificationTokenExpires = emailVerificationTokenExpires;
     await user.save();
+
     const message = `Your email verification token is ${emailVerificationToken} and it expires in 10 minutes`;
     const subject = `Email verification token`;
     await sendMail(email, subject, message);

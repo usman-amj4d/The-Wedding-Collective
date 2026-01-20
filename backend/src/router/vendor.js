@@ -5,7 +5,7 @@ const router = express.Router();
 
 // ? GET
 router
-  .route("/details/:vendor_id")
+  .route("/details/:vendorId")
   .get(isAuthenticated, isVendor, vendorController.getVendorDetails);
 
 // ? POST
@@ -15,7 +15,7 @@ router
 
 // ? PUT
 router
-  .route("/details/:vendor_id")
+  .route("/details/:vendorId")
   .put(isAuthenticated, isVendor, vendorController.updateVendorDetails);
 
 export default router;

@@ -1,7 +1,10 @@
-import { uploadImageOnCloudinary } from "../functions/helperFunctions.js";
 import User from "../models/User/User.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { successHandler } from "../utils/successHandler.js";
+import {
+  uploadImageOnCloudinary,
+  deleteImageFromCloudinary,
+} from "../functions/helperFunctions.js";
 
 // INFO: get user details
 export const getUserDetails = async (req, res) => {
@@ -35,6 +38,13 @@ export const updateProfilePicture = async (req, res) => {
   try {
     const file = req.file ? req.file : req.body.file;
 
+    const { user } = req;
+
+    if (user.profilePhoto && file) {
+      // ? Delete existing profile photo from Cloudinary
+      await deleteImageFromCloudinary(user.profilePhoto);
+    }
+
     if (!file)
       return errorHandler("Profile picture is required", 400, req, res);
 
@@ -46,7 +56,7 @@ export const updateProfilePicture = async (req, res) => {
       { _id: req.user._id },
       {
         $set: {
-          profile_photo: uploadedFile ? uploadedFile.secure_url : file,
+          profilePhoto: uploadedFile ? uploadedFile.secure_url : file,
         },
       },
       { new: true, upsert: true }
@@ -56,7 +66,8 @@ export const updateProfilePicture = async (req, res) => {
       return errorHandler("Failed to update profile photo", 400, req, res);
 
     return successHandler(
-      { message: "Profile photo updated successfully", data: updatedUser },
+      "Profile photo updated successfully",
+      updatedUser,
       200,
       res
     );

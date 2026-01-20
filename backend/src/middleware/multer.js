@@ -6,7 +6,7 @@ import path from "path";
 const storage = multer.memoryStorage();
 
 // ? Check video type
-export const checkVideoType = (req, file, cb) => {
+export const validateVideoFormat = (req, file, cb) => {
   const allowedExt = /mp4|mkv|3gp|flv|mov|avi/;
   const extName = allowedExt.test(
     path.extname(file.originalname).toLowerCase()
@@ -24,7 +24,7 @@ export const checkVideoType = (req, file, cb) => {
 };
 
 // ? Check image type
-export const checkImageType = (req, file, cb) => {
+export const validateImageFormat = (req, file, cb) => {
   const allowedExt = /jpg|jpeg|png|webp|svg/;
   const extName = allowedExt.test(
     path.extname(file.originalname).toLowerCase()
@@ -41,11 +41,17 @@ export const checkImageType = (req, file, cb) => {
   cb(null, true);
 };
 
-export const uploadSingleImage = multer({
+export const uploadImage = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 },
-  fileFilter: imageFilter,
+  fileFilter: validateImageFormat,
 }).single("image");
+
+export const uploadImages = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: validateImageFormat,
+}).array("images", 10);
 
 export const checkFileSize = function (err, req, res, next) {
   if (err.code === "LIMIT_FILE_SIZE") {
@@ -63,17 +69,17 @@ export const checkImageSize = function (err, req, res, next) {
   next();
 };
 
-export const uploadSingleFile = multer({
+export const uploadVideo = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: videoFilter,
-}).single("file");
+  fileFilter: validateVideoFormat,
+}).single("video");
 
-export const uploadMultipleFiles = multer({
+export const uploadVideos = multer({
   storage,
   limits: { fileSize: 10 * 1024 * 1024 },
-  fileFilter: videoFilter,
-}).array("files", 5);
+  fileFilter: validateVideoFormat,
+}).array("videos", 5);
 
 // ? Multer error handler
 export const multerErrorHandler = (err, req, res, next) => {

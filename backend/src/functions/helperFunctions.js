@@ -1,8 +1,8 @@
 import path from "path";
-import { cloudinary } from "../config/cloudinary.js";
-import shortId from "shortid";
-import { getDataURI } from "./dataUri.js";
-import { successHandler } from "./responseHandler.js";
+import cloudinary from "../config/cloudinary.js";
+import shortId from "short-unique-id";
+import { getDataURI } from "../utils/dataUri.js";
+import { successHandler } from "../utils/successHandler.js";
 
 // ? generate referral code
 export const uniqueCode = async (length) => {
@@ -42,7 +42,7 @@ export const uploadImageOnCloudinary = async (file, folder) => {
   const uniqueFilename = `${Date.now()}-${filenameWithoutExtension}`;
 
   const uploadedImage = await cloudinary.uploader.upload(dataUri.content, {
-    folder: `my_wedding_collective/${folder}`,
+    folder: `the_wedding_collective/${folder}`,
     resource_type: "image",
     public_id: uniqueFilename,
   });
@@ -50,15 +50,25 @@ export const uploadImageOnCloudinary = async (file, folder) => {
   return uploadedImage;
 };
 
-// ? delete the image from cloudinary
 export const deleteImageFromCloudinary = async (imageUrl) => {
-  const urlParts = imageUrl.split("/");
-  const uploadIndex = urlParts.indexOf("upload");
-  const path = urlParts.slice(uploadIndex + 2).join("/");
-  const publicId = path.replace(/\.\w+$/, "");
+  if (!imageUrl) return;
 
-  await cloudinary.api.delete_resources([publicId], {
-    type: "upload",
+  // Split at `/upload/`
+  const parts = imageUrl.split("/upload/");
+
+  if (parts.length !== 2) {
+    throw new Error("Invalid Cloudinary URL");
+  }
+
+  // Remove version (v1234567890/)
+  const pathWithVersion = parts[1];
+  const pathWithoutVersion = pathWithVersion.replace(/^v\d+\//, "");
+
+  // Remove file extension
+  const publicId = pathWithoutVersion.replace(/\.[^/.]+$/, "");
+
+  await cloudinary.uploader.destroy(publicId, {
     resource_type: "image",
+    type: "upload",
   });
 };
