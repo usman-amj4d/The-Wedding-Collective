@@ -1,4 +1,5 @@
 import User from "../models/User/User.js";
+import Vendor from "../models/Vendor/Vendor.js";
 import sendMail from "../utils/sendMail.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { successHandler } from "../utils/successHandler.js";
@@ -7,18 +8,18 @@ import { successHandler } from "../utils/successHandler.js";
 export const register = async (req, res) => {
   // #swagger.tags = ['auth']
   try {
-    const { firstName, lastName, email, gender, role, password } = req.body;
+    const { name, email, gender, role, password } = req.body;
 
     if (
       !password.match(
-        /(?=[A-Za-z0-9@#$%^&+!=]+$)^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+!=])(?=.{8,}).*$/
+        /(?=[A-Za-z0-9@#$%^&+!=]+$)^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+!=])(?=.{8,}).*$/,
       )
     ) {
       return errorHandler(
         "Password must contain at least one uppercase letter, one special character, and one number",
         400,
         req,
-        res
+        res,
       );
     }
 
@@ -29,8 +30,7 @@ export const register = async (req, res) => {
     }
 
     const newUser = await User.create({
-      firstName,
-      lastName,
+      name,
       email,
       gender,
       role,
@@ -40,7 +40,7 @@ export const register = async (req, res) => {
 
     newUser.save();
 
-    return successHandler("User created successfully", null, 200, res);
+    return successHandler(`${role} created successfully`, newUser, 200, res);
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
   }
@@ -70,7 +70,7 @@ export const requestEmailToken = async (req, res) => {
       `Email verification token sent to ${email}`,
       null,
       200,
-      res
+      res,
     );
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
@@ -132,7 +132,7 @@ export const login = async (req, res) => {
       "Logged in successfully",
       { jwt, data: user },
       200,
-      res
+      res,
     );
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
@@ -171,7 +171,7 @@ export const forgotPassword = async (req, res) => {
       `Password reset token sent to ${email}`,
       null,
       200,
-      res
+      res,
     );
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
@@ -210,14 +210,14 @@ export const updatePassword = async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     if (
       !newPassword.match(
-        /(?=[A-Za-z0-9@#$%^&+!=]+$)^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+!=])(?=.{8,}).*$/
+        /(?=[A-Za-z0-9@#$%^&+!=]+$)^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@#$%^&+!=])(?=.{8,}).*$/,
       )
     ) {
       return errorHandler(
         "Password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character",
         400,
         req,
-        res
+        res,
       );
     }
     const user = await User.findById(req.user.id).select("+password");
@@ -231,7 +231,7 @@ export const updatePassword = async (req, res) => {
         "New password cannot be the same as the old password",
         400,
         req,
-        res
+        res,
       );
     }
     user.password = newPassword;

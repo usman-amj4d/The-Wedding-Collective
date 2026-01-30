@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
 import dotenv from "dotenv";
+import PackageSchema from "../schemas/package.schema.js";
 
 dotenv.config({ path: ".././src/config/config.env" });
 
@@ -12,7 +13,11 @@ const vendorSchema = new Schema(
       required: true,
       unique: true,
     },
-    companyName: { type: String, required: true },
+    vendorType: {
+      type: String,
+      enum: ["individual", "company"],
+      default: "individual",
+    },
     description: { type: String, required: true },
     phone: { type: String, required: true },
     address: { type: String, required: true },
@@ -23,28 +28,22 @@ const vendorSchema = new Schema(
     servicesOffered: { type: [String], required: true },
     teamSize: { type: Number, required: true },
     yearsOfExperience: { type: Number, required: true },
-    category: { type: [String], required: true }, // e.g., photographer, caterer
-    website: { type: String },
-    socialMediaLinks: { type: [String] },
-    bio: { type: String },
-    logo: { type: String },
-    coverPhoto: { type: String },
+    categories: { type: [String], required: true }, // e.g., photographer, caterer
+    website: { type: String, default: "" },
+    socialMediaLinks: { type: [String], default: [] },
+    bio: { type: String, default: "" },
+    logo: { type: String, default: "" },
+    coverPhoto: { type: String, default: "" },
     totalReviews: { type: Number, default: 0 },
     averageRating: { type: Number, default: 0 },
-    packages: [
-      {
-        packageId: { type: mongoose.Schema.Types.ObjectId, auto: true },
-        packageName: { type: String, required: true },
-        price: { type: Number, required: true },
-        features: { type: [String], required: true },
-        description: { type: String },
-        coverPhoto: { type: String, default: "" },
-      },
-    ],
+    packages: {
+      type: [PackageSchema],
+      default: [],
+    },
     photos: { type: [String], default: [] },
     videos: { type: [String], default: [] },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const Vendor = mongoose.model("Vendor", vendorSchema);

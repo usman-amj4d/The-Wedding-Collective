@@ -9,11 +9,7 @@ dotenv.config({ path: ".././src/config/config.env" });
 
 const userSchema = new Schema(
   {
-    firstName: {
-      type: String,
-      required: true,
-    },
-    lastName: {
+    name: {
       type: String,
       required: true,
     },
@@ -32,8 +28,8 @@ const userSchema = new Schema(
     },
     gender: {
       type: String,
-      enum: ["bride", "groom", "male", "female", "other"],
-      default: "other",
+      enum: ["bride", "groom", "male", "female", ""],
+      default: "",
     },
     role: {
       type: String,
@@ -74,7 +70,7 @@ const userSchema = new Schema(
       default: true,
     },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 // ? Hash password before saving
