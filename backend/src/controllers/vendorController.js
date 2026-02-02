@@ -1,6 +1,10 @@
 import Vendor from "../models/Vendor/Vendor.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { successHandler } from "../utils/successHandler.js";
+import {
+  uploadImageOnCloudinary,
+  deleteImageFromCloudinary,
+} from "../functions/helperFunctions.js";
 
 // INFO: get vendor details
 export const getVendorDetails = async (req, res) => {
@@ -143,6 +147,97 @@ export const updateVendorDetails = async (req, res) => {
       200,
       res,
     );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: update vendor logo or cover photo
+export const updateLogoOrCoverPhoto = async (req, res) => {
+  // #swagger.tags = ['vendor']
+  try {
+    const { user, params } = req;
+    const { photoType } = params; // 'logo' | 'coverPhoto'
+    const file = req.file;
+
+    if (!["logo", "coverPhoto"].includes(photoType)) {
+      return errorHandler("Invalid photo type", 400, req, res);
+    }
+
+    if (!file) {
+      return errorHandler(`${photoType} image is required`, 400, req, res);
+    }
+
+    // Always fetch vendor from DB
+    const vendor = await Vendor.findOne({ vendorId: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor details not found", 404, req, res);
+    }
+
+    // Delete existing image if present
+    if (vendor[photoType]) {
+      await deleteImageFromCloudinary(vendor[photoType]);
+    }
+
+    // Upload new image
+    const uploadedFile = await uploadImageOnCloudinary(
+      file,
+      `vendors/${photoType}`,
+    );
+
+    vendor[photoType] = uploadedFile.secure_url;
+    await vendor.save();
+
+    return successHandler(
+      `${photoType} updated successfully`,
+      vendor,
+      200,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: upload vendor photos or videos
+export const uploadVendorMedia = async (req, res) => {
+  // #swagger.tags = ['vendor']
+  try {
+    const { user, params } = req;
+    const { type } = params; // photo | video
+    const files = req.files || [];
+
+    if (!["photo", "video"].includes(type)) {
+      return errorHandler("Invalid upload type", 400, req, res);
+    }
+
+    if (!files.length) {
+      return errorHandler("No files provided", 400, req, res);
+    }
+
+    const vendor = await Vendor.findOne({ vendorId: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor details not found", 404, req, res);
+    }
+
+    // Upload to Cloudinary
+    const uploadedUrls = await Promise.all(
+      files.map((file) =>
+        uploadImageOnCloudinary(file, `vendors/${type}s`).then(
+          (res) => res.secure_url,
+        ),
+      ),
+    );
+
+    if (type === "photo") {
+      vendor.photos.push(...uploadedUrls);
+    } else {
+      vendor.videos.push(...uploadedUrls);
+    }
+
+    await vendor.save();
+
+    return successHandler(`${type}s uploaded successfully`, vendor, 200, res);
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
   }

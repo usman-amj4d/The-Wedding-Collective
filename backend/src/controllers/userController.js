@@ -36,7 +36,7 @@ export const updateUserDetails = async (req, res) => {
 export const updateProfilePicture = async (req, res) => {
   // #swagger.tags = ['user']
   try {
-    const file = req.file ? req.file : req.body.file;
+    const file = req.file;
 
     const { user } = req;
 
@@ -48,18 +48,19 @@ export const updateProfilePicture = async (req, res) => {
     if (!file)
       return errorHandler("Profile picture is required", 400, req, res);
 
-    const uploadedFile = req.file
-      ? await uploadImageOnCloudinary(req.file, "users/profile-photos")
-      : null;
+    const uploadedFile = await uploadImageOnCloudinary(
+      file,
+      "users/profile-photos",
+    );
 
     const updatedUser = await User.findOneAndUpdate(
       { _id: req.user._id },
       {
         $set: {
-          profilePhoto: uploadedFile ? uploadedFile.secure_url : file,
+          profilePhoto: uploadedFile ? uploadedFile.secure_url : "",
         },
       },
-      { new: true, upsert: true }
+      { new: true, upsert: true },
     );
 
     if (!updatedUser)
@@ -69,7 +70,7 @@ export const updateProfilePicture = async (req, res) => {
       "Profile photo updated successfully",
       updatedUser,
       200,
-      res
+      res,
     );
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
