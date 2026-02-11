@@ -44,4 +44,8 @@ router.put(
   vendorController.uploadVendorMedia,
 );
 
+// ? DELETE
+router
+  .route("/delete/media/:type")
+  .delete(isAuthenticated, isVendor, vendorController.deleteVendorMedia);
 export default router;

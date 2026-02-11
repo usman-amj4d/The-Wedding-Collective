@@ -59,7 +59,7 @@ export const uploadImages = multer({
   storage,
   limits: FILE_LIMITS.image,
   fileFilter: validateImageFormat,
-}).array("images", 10);
+}).array("images", 20);
 
 // export const checkFileSize = function (err, req, res, next) {
 //   if (err.code === "LIMIT_FILE_SIZE") {
@@ -126,8 +126,8 @@ export const uploadMedia = (req, res, next) => {
   const { type } = req.params;
 
   let uploader;
-  if (type === "photo") uploader = uploadImages;
-  else if (type === "video") uploader = uploadVideos;
+  if (type === "photos") uploader = uploadImages;
+  else if (type === "videos") uploader = uploadVideos;
   else return errorHandler("Invalid upload type", 400, req, res);
 
   uploader(req, res, (err) => {

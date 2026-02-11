@@ -2,8 +2,8 @@ import User from "../models/User/User.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { successHandler } from "../utils/successHandler.js";
 import {
-  uploadImageOnCloudinary,
-  deleteImageFromCloudinary,
+  uploadMediaOnCloudinary,
+  deleteMediaFromCloudinary,
 } from "../functions/helperFunctions.js";
 
 // INFO: get user details
@@ -42,13 +42,13 @@ export const updateProfilePicture = async (req, res) => {
 
     if (user.profilePhoto && file) {
       // ? Delete existing profile photo from Cloudinary
-      await deleteImageFromCloudinary(user.profilePhoto);
+      await deleteMediaFromCloudinary(user.profilePhoto);
     }
 
     if (!file)
       return errorHandler("Profile picture is required", 400, req, res);
 
-    const uploadedFile = await uploadImageOnCloudinary(
+    const uploadedFile = await uploadMediaOnCloudinary(
       file,
       "users/profile-photos",
     );

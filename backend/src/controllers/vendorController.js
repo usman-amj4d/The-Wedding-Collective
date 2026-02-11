@@ -2,8 +2,9 @@ import Vendor from "../models/Vendor/Vendor.js";
 import { errorHandler } from "../utils/errorHandler.js";
 import { successHandler } from "../utils/successHandler.js";
 import {
-  uploadImageOnCloudinary,
-  deleteImageFromCloudinary,
+  uploadMediaOnCloudinary,
+  deleteMediaFromCloudinary,
+  deleteMultipleMediaFromCloudinary,
 } from "../functions/helperFunctions.js";
 
 // INFO: get vendor details
@@ -176,11 +177,11 @@ export const updateLogoOrCoverPhoto = async (req, res) => {
 
     // Delete existing image if present
     if (vendor[photoType]) {
-      await deleteImageFromCloudinary(vendor[photoType]);
+      await deleteMediaFromCloudinary(vendor[photoType]);
     }
 
     // Upload new image
-    const uploadedFile = await uploadImageOnCloudinary(
+    const uploadedFile = await uploadMediaOnCloudinary(
       file,
       `vendors/${photoType}`,
     );
@@ -190,7 +191,7 @@ export const updateLogoOrCoverPhoto = async (req, res) => {
 
     return successHandler(
       `${photoType} updated successfully`,
-      vendor,
+      { [photoType]: vendor[photoType] },
       200,
       res,
     );
@@ -204,10 +205,10 @@ export const uploadVendorMedia = async (req, res) => {
   // #swagger.tags = ['vendor']
   try {
     const { user, params } = req;
-    const { type } = params; // photo | video
+    const { type } = params; // photos | videos
     const files = req.files || [];
 
-    if (!["photo", "video"].includes(type)) {
+    if (!["photos", "videos"].includes(type)) {
       return errorHandler("Invalid upload type", 400, req, res);
     }
 
@@ -220,24 +221,112 @@ export const uploadVendorMedia = async (req, res) => {
       return errorHandler("Vendor details not found", 404, req, res);
     }
 
+    // 💡 Media limits
+    const LIMITS = {
+      photos: 20,
+      videos: 5,
+    };
+
+    const existingCount =
+      type === "photos" ? vendor.photos.length : vendor.videos.length;
+
+    const incomingCount = files.length;
+
+    const remaining = LIMITS[type] - existingCount;
+
+    if (existingCount + incomingCount > LIMITS[type]) {
+      return errorHandler(
+        `You can upload a maximum of ${LIMITS[type]} ${type}. ` +
+          `You already have ${existingCount}. You can upload only ${remaining} more ${type}.`,
+        400,
+        req,
+        res,
+      );
+    }
+
     // Upload to Cloudinary
     const uploadedUrls = await Promise.all(
       files.map((file) =>
-        uploadImageOnCloudinary(file, `vendors/${type}s`).then(
-          (res) => res.secure_url,
-        ),
+        uploadMediaOnCloudinary(
+          file,
+          `vendors/${type}`,
+          type === "photos" ? "image" : "video",
+        ).then((res) => res.secure_url),
       ),
     );
 
-    if (type === "photo") {
-      vendor.photos.push(...uploadedUrls);
+    if (type === "photos") {
+      vendor.photos = [...new Set([...vendor.photos, ...uploadedUrls])];
     } else {
-      vendor.videos.push(...uploadedUrls);
+      vendor.videos = [...new Set([...vendor.videos, ...uploadedUrls])];
     }
 
     await vendor.save();
 
-    return successHandler(`${type}s uploaded successfully`, vendor, 200, res);
+    return successHandler(
+      `${type} uploaded successfully`,
+      { [type]: vendor[type] },
+      200,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: delete vendor photos or videos
+export const deleteVendorMedia = async (req, res) => {
+  // #swagger.tags = ['vendor']
+  try {
+    const { user, params, body } = req;
+    const { type } = params; // photos | videos
+    const { urls } = body;
+
+    // Validate type
+    if (!["photos", "videos"].includes(type)) {
+      return errorHandler("Invalid media type", 400, req, res);
+    }
+
+    // Validate urls
+    if (!Array.isArray(urls) || urls.length === 0) {
+      return errorHandler("Please provide media URLs to delete", 400, req, res);
+    }
+
+    const vendor = await Vendor.findOne({ vendorId: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor details not found", 404, req, res);
+    }
+
+    const mediaField = type === "photos" ? "photos" : "videos";
+    const existingMedia = vendor[mediaField];
+
+    // Check if provided URLs exist
+    const notFound = urls.filter((url) => !existingMedia.includes(url));
+    if (notFound.length) {
+      return errorHandler(
+        `Some ${type} do not exist or do not belong to this vendor`,
+        400,
+        req,
+        res,
+      );
+    }
+
+    await deleteMultipleMediaFromCloudinary(
+      urls,
+      type === "photos" ? "image" : "video",
+    );
+
+    // Remove from DB
+    vendor[mediaField] = existingMedia.filter((url) => !urls.includes(url));
+
+    await vendor.save();
+
+    return successHandler(
+      `${urls.length} ${type}${urls.length > 1 ? "s" : ""} deleted successfully`,
+      vendor,
+      200,
+      res,
+    );
   } catch (error) {
     return errorHandler(error.message, 500, req, res);
   }

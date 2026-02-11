@@ -209,3 +209,33 @@
 {"date":"2026-01-30T20:00:14.943Z","level":"error","message":"Vendor validation failed: description: Path `description` is required., phone: Path `phone` is required., address: Path `address` is required., coverageTime: Path `coverageTime` is required., basedIn: Path `basedIn` is required., deliveryTime: Path `deliveryTime` is required., teamSize: Path `teamSize` is required., yearsOfExperience: Path `yearsOfExperience` is required.","method":"POST","service":"user-service","url":"/details"}
 {"date":"2026-01-30T20:01:42.699Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/vendor/details"}
 {"date":"2026-01-30T20:08:54.538Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/details"}
+{"date":"2026-02-11T20:47:37.859Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2026-02-11T20:47:53.203Z","level":"info","message":"Request received","method":"GET","service":"user-service","url":"/vendor/details"}
+{"date":"2026-02-11T20:49:25.839Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/details"}
+{"date":"2026-02-11T20:49:44.105Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/vendor/details"}
+{"date":"2026-02-11T20:49:44.477Z","level":"error","message":"Vendor details already exist","method":"POST","service":"user-service","url":"/details"}
+{"date":"2026-02-11T20:54:34.474Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/vendor/update/logo"}
+{"date":"2026-02-11T20:54:34.476Z","level":"error","message":"The Requested Route localhost/vendor/update/logo Not Found","method":"POST","service":"user-service","url":"/vendor/update/logo"}
+{"date":"2026-02-11T21:01:58.783Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/update/logo"}
+{"date":"2026-02-11T21:05:35.084Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/update/logo"}
+{"date":"2026-02-11T21:07:40.069Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/update/logo"}
+{"date":"2026-02-11T21:09:00.266Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/update/coverPhoto"}
+{"date":"2026-02-11T21:17:43.881Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:17:44.068Z","level":"error","message":"Invalid upload type","method":"PUT","service":"user-service","url":"/upload/photos"}
+{"date":"2026-02-11T21:17:58.888Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:17:59.076Z","level":"error","message":"Invalid upload type","method":"PUT","service":"user-service","url":"/upload/photos"}
+{"date":"2026-02-11T21:18:04.643Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:18:04.831Z","level":"error","message":"Invalid upload type","method":"PUT","service":"user-service","url":"/upload/photos"}
+{"date":"2026-02-11T21:19:09.867Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:23:01.308Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:23:11.711Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:40:00.092Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:40:08.618Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:40:29.348Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:40:59.121Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:41:00.587Z","level":"error","message":"You can upload a maximum of 20 photos. You already have 5. You can upload only 15 more photos.","method":"PUT","service":"user-service","url":"/upload/photos"}
+{"date":"2026-02-11T21:41:24.914Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/photos"}
+{"date":"2026-02-11T21:51:29.874Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/videos"}
+{"date":"2026-02-11T21:51:30.071Z","level":"error","message":"No files provided","method":"PUT","service":"user-service","url":"/upload/videos"}
+{"date":"2026-02-11T21:52:08.986Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/videos"}
+{"date":"2026-02-11T21:52:11.466Z","level":"error","message":"Invalid image file","method":"PUT","service":"user-service","url":"/upload/videos"}

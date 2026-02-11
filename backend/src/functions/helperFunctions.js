@@ -34,7 +34,11 @@ export const generateReferralCodes = async (req, res) => {
 };
 
 // ? upload image function
-export const uploadImageOnCloudinary = async (file, folder) => {
+export const uploadMediaOnCloudinary = async (
+  file,
+  folder,
+  fileType = "image",
+) => {
   const dataUri = getDataURI(file);
   const filenameWithoutExtension = path
     .parse(file.originalname)
@@ -43,32 +47,60 @@ export const uploadImageOnCloudinary = async (file, folder) => {
 
   const uploadedImage = await cloudinary.uploader.upload(dataUri.content, {
     folder: `the_wedding_collective/${folder}`,
-    resource_type: "image",
+    resource_type: fileType,
     public_id: uniqueFilename,
   });
 
   return uploadedImage;
 };
 
-export const deleteImageFromCloudinary = async (imageUrl) => {
-  if (!imageUrl) return;
+// utils/cloudinary/deleteMedia.js
+export const deleteMediaFromCloudinary = async (
+  mediaUrl,
+  resourceType = "image",
+) => {
+  if (!mediaUrl) return;
 
-  // Split at `/upload/`
-  const parts = imageUrl.split("/upload/");
-
+  const parts = mediaUrl.split("/upload/");
   if (parts.length !== 2) {
     throw new Error("Invalid Cloudinary URL");
   }
 
-  // Remove version (v1234567890/)
   const pathWithVersion = parts[1];
+
+  // Remove version (v1234567890/)
   const pathWithoutVersion = pathWithVersion.replace(/^v\d+\//, "");
 
-  // Remove file extension
+  // Remove extension
   const publicId = pathWithoutVersion.replace(/\.[^/.]+$/, "");
 
   await cloudinary.uploader.destroy(publicId, {
-    resource_type: "image",
+    resource_type: resourceType, // image | video
+    type: "upload",
+  });
+};
+
+// utils/cloudinary/deleteMultipleMedia.js
+export const deleteMultipleMediaFromCloudinary = async (
+  mediaUrls = [],
+  resourceType = "image",
+) => {
+  if (!Array.isArray(mediaUrls) || !mediaUrls.length) return;
+
+  const publicIds = mediaUrls
+    .map((url) => {
+      const parts = url.split("/upload/");
+      if (parts.length !== 2) return null;
+
+      const pathWithoutVersion = parts[1].replace(/^v\d+\//, "");
+      return pathWithoutVersion.replace(/\.[^/.]+$/, "");
+    })
+    .filter(Boolean);
+
+  if (!publicIds.length) return;
+
+  await cloudinary.api.delete_resources(publicIds, {
+    resource_type: resourceType, // image | video
     type: "upload",
   });
 };
