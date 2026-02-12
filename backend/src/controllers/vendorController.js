@@ -331,3 +331,142 @@ export const deleteVendorMedia = async (req, res) => {
     return errorHandler(error.message, 500, req, res);
   }
 };
+
+// INFO: Add packages
+export const addVendorPackage = async (req, res) => {
+  // #swagger.tags = ['vendor']
+  try {
+    const { user, body } = req;
+    const { packageName, description, price, features } = body;
+    const file = req.file;
+
+    if (
+      !packageName ||
+      !description ||
+      price === undefined ||
+      !features ||
+      !file
+    ) {
+      return errorHandler(
+        "Please provide package name, description, price, features, and cover photo for the package",
+        400,
+        req,
+        res,
+      );
+    }
+
+    const vendor = await Vendor.findOne({ vendorId: user._id });
+
+    if (!vendor) {
+      return errorHandler("Vendor details not found", 404, req, res);
+    }
+
+    // Upload new image
+    const uploadedFile = await uploadMediaOnCloudinary(
+      file,
+      `vendors/${user._id}/packages/${packageName}`,
+    );
+
+    const newPackage = {
+      packageName,
+      description,
+      price,
+      features,
+      coverPhoto: uploadedFile.secure_url,
+    };
+
+    vendor.packages.push(newPackage);
+    await vendor.save();
+
+    return successHandler(
+      "Package added successfully",
+      { packages: vendor.packages },
+      201,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: Update package
+export const updateVendorPackage = async (req, res) => {
+  // #swagger.tags = ['vendor']
+  try {
+    const { user, params, body } = req;
+    const { packageId } = params;
+    const { packageName, description, price, features } = body;
+    const file = req.file;
+
+    const vendor = await Vendor.findOne({ vendorId: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor details not found", 404, req, res);
+    }
+
+    const pkg = vendor.packages.id(packageId);
+    if (!pkg) {
+      return errorHandler("Package not found", 404, req, res);
+    }
+
+    if (packageName !== undefined) pkg.packageName = packageName;
+    if (description !== undefined) pkg.description = description;
+    if (price !== undefined) pkg.price = price;
+    if (features !== undefined) pkg.features = features;
+
+    // Update cover photo if a new file is uploaded
+    if (file) {
+      // Delete old cover photo from Cloudinary
+      await deleteMediaFromCloudinary(pkg.coverPhoto);
+
+      // Upload new cover photo
+      const uploadedFile = await uploadMediaOnCloudinary(
+        file,
+        `vendors/${user._id}/packages/${packageName}`,
+      );
+      pkg.coverPhoto = uploadedFile.secure_url;
+    }
+
+    await vendor.save();
+
+    return successHandler(
+      "Package updated successfully",
+      { packages: vendor.packages },
+      200,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: Delete package
+export const deleteVendorPackage = async (req, res) => {
+  // #swagger.tags = ['vendor']
+  try {
+    const { user, params } = req;
+    const { packageId } = params;
+
+    const vendor = await Vendor.findOne({ vendorId: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor details not found", 404, req, res);
+    }
+    const pkg = vendor.packages.id(packageId);
+    if (!pkg) {
+      return errorHandler("Package not found", 404, req, res);
+    }
+
+    // Delete cover photo from Cloudinary
+    await deleteMediaFromCloudinary(pkg.coverPhoto);
+    pkg.remove();
+    await vendor.save();
+
+    return successHandler(
+      "Package deleted successfully",
+      { packages: vendor.packages },
+      200,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};

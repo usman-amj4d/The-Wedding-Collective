@@ -28,7 +28,7 @@ const vendorSchema = new Schema(
     servicesOffered: { type: [String], required: true },
     teamSize: { type: Number, required: true },
     yearsOfExperience: { type: Number, required: true },
-    categories: { type: [String], required: true }, // e.g., photographer, caterer
+    categories: { type: [String], required: true },
     website: { type: String, default: "" },
     socialMediaLinks: { type: [String], default: [] },
     bio: { type: String, default: "" },

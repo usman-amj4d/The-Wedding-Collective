@@ -4,7 +4,6 @@ const PackageSchema = new mongoose.Schema({
   packageName: {
     type: String,
     required: true,
-    trim: true,
   },
   price: {
     type: Number,
@@ -17,11 +16,11 @@ const PackageSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    default: "",
+    required: true,
   },
   coverPhoto: {
     type: String,
-    default: "",
+    required: true,
   },
 });
 
