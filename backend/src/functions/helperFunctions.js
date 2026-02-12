@@ -40,9 +40,17 @@ export const uploadMediaOnCloudinary = async (
   fileType = "image",
 ) => {
   const dataUri = getDataURI(file);
-  const filenameWithoutExtension = path
-    .parse(file.originalname)
-    .name.replace(" ", "-");
+
+  const slugify = (name) =>
+    name
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, "-")
+      .replace(/[^a-z0-9-_]/g, "")
+      .replace(/-+/g, "-");
+
+  const filenameWithoutExtension = slugify(path.parse(file.originalname).name);
+
   const uniqueFilename = `${Date.now()}-${filenameWithoutExtension}`;
 
   const uploadedImage = await cloudinary.uploader.upload(dataUri.content, {

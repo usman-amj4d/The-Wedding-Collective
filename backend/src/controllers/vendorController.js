@@ -183,7 +183,7 @@ export const updateLogoOrCoverPhoto = async (req, res) => {
     // Upload new image
     const uploadedFile = await uploadMediaOnCloudinary(
       file,
-      `vendors/${photoType}`,
+      `vendors/${user._id}/${photoType}`,
     );
 
     vendor[photoType] = uploadedFile.secure_url;
@@ -249,7 +249,7 @@ export const uploadVendorMedia = async (req, res) => {
       files.map((file) =>
         uploadMediaOnCloudinary(
           file,
-          `vendors/${type}`,
+          `vendors/${user._id}/${type}`,
           type === "photos" ? "image" : "video",
         ).then((res) => res.secure_url),
       ),
@@ -323,7 +323,7 @@ export const deleteVendorMedia = async (req, res) => {
 
     return successHandler(
       `${urls.length} ${type}${urls.length > 1 ? "s" : ""} deleted successfully`,
-      vendor,
+      { [mediaField]: vendor[mediaField] },
       200,
       res,
     );

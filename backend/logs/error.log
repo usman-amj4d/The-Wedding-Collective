@@ -42,3 +42,9 @@
 {"date":"2026-02-11T21:41:00.587Z","level":"error","message":"You can upload a maximum of 20 photos. You already have 5. You can upload only 15 more photos.","method":"PUT","service":"user-service","url":"/upload/photos"}
 {"date":"2026-02-11T21:51:30.071Z","level":"error","message":"No files provided","method":"PUT","service":"user-service","url":"/upload/videos"}
 {"date":"2026-02-11T21:52:11.466Z","level":"error","message":"Invalid image file","method":"PUT","service":"user-service","url":"/upload/videos"}
+{"date":"2026-02-12T19:16:07.184Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:21:33.216Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:23:20.039Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:23:34.058Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:24:17.959Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T20:49:39.468Z","level":"error","message":"Some photos do not exist or do not belong to this vendor","method":"DELETE","service":"user-service","url":"/delete/media/photos"}

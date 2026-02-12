@@ -239,3 +239,21 @@
 {"date":"2026-02-11T21:51:30.071Z","level":"error","message":"No files provided","method":"PUT","service":"user-service","url":"/upload/videos"}
 {"date":"2026-02-11T21:52:08.986Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/videos"}
 {"date":"2026-02-11T21:52:11.466Z","level":"error","message":"Invalid image file","method":"PUT","service":"user-service","url":"/upload/videos"}
+{"date":"2026-02-11T21:57:10.863Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/upload/videos"}
+{"date":"2026-02-12T19:16:06.969Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photo"}
+{"date":"2026-02-12T19:16:07.184Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:16:35.321Z","level":"info","message":"Request received","method":"GET","service":"user-service","url":"/vendor/details"}
+{"date":"2026-02-12T19:21:33.030Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photo"}
+{"date":"2026-02-12T19:21:33.216Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:23:18.909Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photo"}
+{"date":"2026-02-12T19:23:20.039Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:23:33.864Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photo"}
+{"date":"2026-02-12T19:23:34.058Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:24:17.747Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photo"}
+{"date":"2026-02-12T19:24:17.959Z","level":"error","message":"Invalid media type","method":"DELETE","service":"user-service","url":"/delete/media/photo"}
+{"date":"2026-02-12T19:24:41.465Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photos"}
+{"date":"2026-02-12T20:49:22.086Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photos"}
+{"date":"2026-02-12T20:49:25.445Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photos"}
+{"date":"2026-02-12T20:49:32.114Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2026-02-12T20:49:38.847Z","level":"info","message":"Request received","method":"DELETE","service":"user-service","url":"/vendor/delete/media/photos"}
+{"date":"2026-02-12T20:49:39.468Z","level":"error","message":"Some photos do not exist or do not belong to this vendor","method":"DELETE","service":"user-service","url":"/delete/media/photos"}

@@ -50,7 +50,7 @@ export const updateProfilePicture = async (req, res) => {
 
     const uploadedFile = await uploadMediaOnCloudinary(
       file,
-      "users/profile-photos",
+      `users/${user._id}/profile-photos`,
     );
 
     const updatedUser = await User.findOneAndUpdate(
