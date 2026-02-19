@@ -7,13 +7,16 @@ import {
   deleteMultipleMediaFromCloudinary,
 } from "../functions/helperFunctions.js";
 
+// ? Vendor details APIS
 // INFO: get vendor details
 export const getVendorDetails = async (req, res) => {
   // #swagger.tags = ['vendor']
   try {
     const { user } = req;
 
-    const vendor = await Vendor.findOne({ vendorId: user._id });
+    const vendor = await Vendor.findOne({ vendorId: user._id }).select(
+      "-packages",
+    );
 
     const responseData = {
       ...user._doc,
@@ -153,6 +156,7 @@ export const updateVendorDetails = async (req, res) => {
   }
 };
 
+// ? vendor media (logo/cover photo, photos/videos) APIS
 // INFO: update vendor logo or cover photo
 export const updateLogoOrCoverPhoto = async (req, res) => {
   // #swagger.tags = ['vendor']
@@ -324,6 +328,32 @@ export const deleteVendorMedia = async (req, res) => {
     return successHandler(
       `${urls.length} ${type}${urls.length > 1 ? "s" : ""} deleted successfully`,
       { [mediaField]: vendor[mediaField] },
+      200,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// ? Packages APIS
+// INFO: get vendor packages
+export const getVendorPackages = async (req, res) => {
+  // #swagger.tags = ['vendor']
+  try {
+    const { user } = req;
+
+    const vendor = await Vendor.findOne({ vendorId: user._id }).select(
+      "packages",
+    );
+
+    if (!vendor) {
+      return errorHandler("Vendor details not found", 404, req, res);
+    }
+
+    return successHandler(
+      "Vendor packages fetched successfully",
+      { packages: vendor.packages },
       200,
       res,
     );
