@@ -3,7 +3,6 @@ import { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import validator from "validator";
 
 dotenv.config({ path: ".././src/config/config.env" });
 
@@ -17,11 +16,6 @@ const userSchema = new Schema(
       type: String,
       required: true,
       unique: true,
-      validate(value) {
-        if (!validator.isEmail(value)) {
-          throw new Error("Invalid Email");
-        }
-      },
     },
     password: {
       type: String,
@@ -30,11 +24,13 @@ const userSchema = new Schema(
       type: String,
       enum: ["bride", "groom", "male", "female", ""],
       default: "",
+      index: true,
     },
     role: {
       type: String,
       enum: ["couple", "vendor", "admin"],
-      default: "user",
+      default: "couple",
+      index: true,
     },
     auth: {
       type: String,
@@ -75,7 +71,7 @@ const userSchema = new Schema(
 
 // ? Hash password before saving
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next;
+  if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password, salt);
   next();
@@ -92,6 +88,18 @@ userSchema.methods.getJWT = function () {
 userSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcrypt.compare(enteredPassword, this.password);
 };
+
+// ? Hide Sensitive Data
+userSchema.set("toJSON", {
+  transform: function (doc, userObject) {
+    delete userObject.password;
+    delete userObject.emailVerificationToken;
+    delete userObject.emailVerificationTokenExpires;
+    delete userObject.passwordResetToken;
+    delete userObject.passwordResetTokenExpires;
+    return userObject;
+  },
+});
 
 const User = mongoose.model("User", userSchema);
 

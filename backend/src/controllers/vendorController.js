@@ -5,7 +5,10 @@ import {
   uploadMediaOnCloudinary,
   deleteMediaFromCloudinary,
   deleteMultipleMediaFromCloudinary,
+  VENDOR_MEDIA_LIMITS,
+  PACKAGES_MEDIA_LIMITS,
 } from "../functions/helperFunctions.js";
+import VendorPackage from "../models/Vendor/VendorPackage.js";
 
 // ? Vendor details APIS
 // INFO: get vendor details
@@ -14,9 +17,7 @@ export const getVendorDetails = async (req, res) => {
   try {
     const { user } = req;
 
-    const vendor = await Vendor.findOne({ vendorId: user._id }).select(
-      "-packages",
-    );
+    const vendor = await Vendor.findOne({ user: user._id });
 
     const responseData = {
       ...user._doc,
@@ -38,9 +39,10 @@ export const getVendorDetails = async (req, res) => {
 export const addVendorDetails = async (req, res) => {
   // #swagger.tags = ['vendor']
   try {
-    const { body, user } = req;
+    const { body, user, file } = req;
 
-    const existingVendor = await Vendor.findOne({ vendorId: user._id });
+    // ? Check if vendor details already exist for this user
+    const existingVendor = await Vendor.findOne({ user: user._id });
     if (existingVendor) {
       return errorHandler("Vendor details already exist", 409, req, res);
     }
@@ -63,10 +65,21 @@ export const addVendorDetails = async (req, res) => {
       bio,
     } = body;
 
-    const vendorId = user._id;
+    // ? Logo is required for creating vendor details, so if file is not present return error
+    if (!file) {
+      return errorHandler("Logo image is required", 400, req, res);
+    }
 
+    // ? Upload logo to Cloudinary
+    const uploadedLogo = await uploadMediaOnCloudinary(
+      file,
+      `vendors/${user._id}/logo`,
+      "image",
+    );
+
+    // ? Create vendor document
     const vendor = await Vendor.create({
-      vendorId,
+      user: user._id,
       vendorType,
       description,
       phone,
@@ -82,6 +95,7 @@ export const addVendorDetails = async (req, res) => {
       website,
       socialMediaLinks,
       bio,
+      logo: uploadedLogo.secure_url,
     });
 
     return successHandler(
@@ -102,7 +116,7 @@ export const updateVendorDetails = async (req, res) => {
     const { body, user } = req;
 
     // Check vendor exists
-    const vendor = await Vendor.findOne({ vendorId: user._id });
+    const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }
@@ -140,7 +154,7 @@ export const updateVendorDetails = async (req, res) => {
     }
 
     const updatedVendor = await Vendor.findOneAndUpdate(
-      { vendorId: user._id },
+      { user: user._id },
       { $set: updates },
       { new: true, runValidators: true },
     );
@@ -173,18 +187,18 @@ export const updateLogoOrCoverPhoto = async (req, res) => {
       return errorHandler(`${photoType} image is required`, 400, req, res);
     }
 
-    // Always fetch vendor from DB
-    const vendor = await Vendor.findOne({ vendorId: user._id });
+    // ? Fetch vendor
+    const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }
 
-    // Delete existing image if present
+    // ? Delete existing image if present
     if (vendor[photoType]) {
       await deleteMediaFromCloudinary(vendor[photoType]);
     }
 
-    // Upload new image
+    // ? Upload new image
     const uploadedFile = await uploadMediaOnCloudinary(
       file,
       `vendors/${user._id}/${photoType}`,
@@ -220,27 +234,21 @@ export const uploadVendorMedia = async (req, res) => {
       return errorHandler("No files provided", 400, req, res);
     }
 
-    const vendor = await Vendor.findOne({ vendorId: user._id });
+    const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }
-
-    // 💡 Media limits
-    const LIMITS = {
-      photos: 20,
-      videos: 5,
-    };
 
     const existingCount =
       type === "photos" ? vendor.photos.length : vendor.videos.length;
 
     const incomingCount = files.length;
 
-    const remaining = LIMITS[type] - existingCount;
+    const remaining = VENDOR_MEDIA_LIMITS[type] - existingCount;
 
-    if (existingCount + incomingCount > LIMITS[type]) {
+    if (existingCount + incomingCount > VENDOR_MEDIA_LIMITS[type]) {
       return errorHandler(
-        `You can upload a maximum of ${LIMITS[type]} ${type}. ` +
+        `You can upload a maximum of ${VENDOR_MEDIA_LIMITS[type]} ${type}. ` +
           `You already have ${existingCount}. You can upload only ${remaining} more ${type}.`,
         400,
         req,
@@ -296,7 +304,7 @@ export const deleteVendorMedia = async (req, res) => {
       return errorHandler("Please provide media URLs to delete", 400, req, res);
     }
 
-    const vendor = await Vendor.findOne({ vendorId: user._id });
+    const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }
@@ -339,21 +347,25 @@ export const deleteVendorMedia = async (req, res) => {
 // ? Packages APIS
 // INFO: get vendor packages
 export const getVendorPackages = async (req, res) => {
-  // #swagger.tags = ['vendor']
+  // #swagger.tags = ['vendor', 'packages']
   try {
     const { user } = req;
 
-    const vendor = await Vendor.findOne({ vendorId: user._id }).select(
-      "packages",
-    );
+    const vendor = await Vendor.findOne({ vendor: user._id });
 
     if (!vendor) {
-      return errorHandler("Vendor details not found", 404, req, res);
+      return errorHandler("Vendor not found", 404, req, res);
+    }
+
+    const VendorPackage = await VendorPackage.findOne({ vendor: vendor._id });
+
+    if (!VendorPackage) {
+      return errorHandler("Vendor packages not found", 404, req, res);
     }
 
     return successHandler(
       "Vendor packages fetched successfully",
-      { packages: vendor.packages },
+      { packages: VendorPackage },
       200,
       res,
     );
@@ -362,12 +374,13 @@ export const getVendorPackages = async (req, res) => {
   }
 };
 
-// INFO: Add packages
+// INFO: Add vendor package
 export const addVendorPackage = async (req, res) => {
-  // #swagger.tags = ['vendor']
+  // #swagger.tags = ['vendor', 'packages']
   try {
     const { user, body } = req;
-    const { packageName, description, price, features } = body;
+    const { packageName, description, price, features, category, addOns } =
+      body;
     const file = req.file;
 
     if (
@@ -378,40 +391,122 @@ export const addVendorPackage = async (req, res) => {
       !file
     ) {
       return errorHandler(
-        "Please provide package name, description, price, features, and cover photo for the package",
+        "Please provide package name, description, price, features, and cover photo",
         400,
         req,
         res,
       );
     }
 
-    const vendor = await Vendor.findOne({ vendorId: user._id });
-
+    // ? Find vendor
+    const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }
 
-    // Upload new image
+    const existingPackage = await VendorPackage.findOne({
+      vendor: vendor._id,
+      packageName,
+    });
+
+    if (existingPackage) {
+      return errorHandler("Package name already exists", 400, req, res);
+    }
+
+    // ? Upload cover image
     const uploadedFile = await uploadMediaOnCloudinary(
       file,
-      `vendors/${user._id}/packages/${packageName}`,
+      `vendors/${user._id}/packages`,
+      "image",
     );
 
-    const newPackage = {
-      packageName,
-      description,
+    // ? Create package document
+    const newPackage = await VendorPackage.create({
+      vendor: vendor._id,
+      packageName: packageName.trim(),
+      description: description.trim(),
       price,
+      category,
+      addOns: addOns || [],
       features,
       coverPhoto: uploadedFile.secure_url,
-    };
-
-    vendor.packages.push(newPackage);
-    await vendor.save();
+    });
 
     return successHandler(
       "Package added successfully",
-      { packages: vendor.packages },
+      { package: newPackage },
       201,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: upload package media (photos/videos)
+export const uploadVendorPackageMedia = async (req, res) => {
+  // #swagger.tags = ['vendor', 'packages']
+  try {
+    const { user, params, files } = req;
+    const { packageId, type } = params;
+
+    if (!["photos", "videos"].includes(type)) {
+      return errorHandler("Invalid upload type", 400, req, res);
+    }
+
+    if (!files || !files.length) {
+      return errorHandler("No files provided", 400, req, res);
+    }
+
+    // ? Find vendor
+    const vendor = await Vendor.findOne({ user: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor not found", 404, req, res);
+    }
+
+    // ? Find package (must belong to this vendor)
+    const vendorPackage = await VendorPackage.findOne({
+      _id: packageId,
+      vendor: vendor._id,
+    });
+
+    if (!vendorPackage) {
+      return errorHandler("Package not found", 404, req, res);
+    }
+
+    // ? Calculate existing count, incoming count, and remaining slots
+    const existingCount = vendorPackage[type].length;
+    const incomingCount = files.length;
+    const remaining = PACKAGES_MEDIA_LIMITS[type] - existingCount;
+
+    if (incomingCount > remaining) {
+      return errorHandler(
+        `You can upload a maximum of ${PACKAGES_MEDIA_LIMITS[type]} ${type}. You already have ${existingCount}. You can upload only ${remaining} more.`,
+        400,
+        req,
+        res,
+      );
+    }
+
+    // ? Upload to Cloudinary
+    const uploadedUrls = await Promise.all(
+      files.map((file) =>
+        uploadMediaOnCloudinary(
+          file,
+          `vendors/${vendor._id}/packages/${packageId}/${type}`,
+          type === "photos" ? "image" : "video",
+        ).then((result) => result.secure_url),
+      ),
+    );
+
+    // ? Append and save updated package document
+    vendorPackage[type] = [...vendorPackage[type], ...uploadedUrls];
+    await vendorPackage.save();
+
+    return successHandler(
+      `${type} uploaded successfully`,
+      { [type]: vendorPackage[type] },
+      200,
       res,
     );
   } catch (error) {
@@ -428,7 +523,7 @@ export const updateVendorPackage = async (req, res) => {
     const { packageName, description, price, features } = body;
     const file = req.file;
 
-    const vendor = await Vendor.findOne({ vendorId: user._id });
+    const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }
@@ -476,7 +571,7 @@ export const deleteVendorPackage = async (req, res) => {
     const { user, params } = req;
     const { packageId } = params;
 
-    const vendor = await Vendor.findOne({ vendorId: user._id });
+    const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }

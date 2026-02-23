@@ -1,13 +1,10 @@
 import mongoose from "mongoose";
 import { Schema } from "mongoose";
-import dotenv from "dotenv";
-import PackageSchema from "../schemas/package.schema.js";
-
-dotenv.config({ path: ".././src/config/config.env" });
+import { VENDOR_MEDIA_LIMITS } from "../../functions/helperFunctions.js";
 
 const vendorSchema = new Schema(
   {
-    vendorId: {
+    user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
       required: true,
@@ -28,23 +25,38 @@ const vendorSchema = new Schema(
     servicesOffered: { type: [String], required: true },
     teamSize: { type: Number, required: true },
     yearsOfExperience: { type: Number, required: true },
-    categories: { type: [String], required: true },
+    categories: { type: [String], required: true, index: true },
     website: { type: String, default: "" },
     socialMediaLinks: { type: [String], default: [] },
     bio: { type: String, default: "" },
-    logo: { type: String, default: "" },
+    logo: { type: String, required: true },
     coverPhoto: { type: String, default: "" },
     totalReviews: { type: Number, default: 0 },
     averageRating: { type: Number, default: 0 },
-    packages: {
-      type: [PackageSchema],
+    photos: {
+      type: [String],
       default: [],
+      validate: [photosLimit, "{PATH} exceeds limit"],
     },
-    photos: { type: [String], default: [] },
-    videos: { type: [String], default: [] },
+    videos: {
+      type: [String],
+      default: [],
+      validate: [videosLimit, "{PATH} exceeds limit"],
+    },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: true },
 );
+
+vendorSchema.index({ categories: 1, basedIn: 1 });
+
+function photosLimit(val) {
+  return val.length <= VENDOR_MEDIA_LIMITS.photos;
+}
+
+function videosLimit(val) {
+  return val.length <= VENDOR_MEDIA_LIMITS.videos;
+}
 
 const Vendor = mongoose.model("Vendor", vendorSchema);
 

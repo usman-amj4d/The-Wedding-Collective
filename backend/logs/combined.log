@@ -259,3 +259,7 @@
 {"date":"2026-02-12T20:49:39.468Z","level":"error","message":"Some photos do not exist or do not belong to this vendor","method":"DELETE","service":"user-service","url":"/delete/media/photos"}
 {"date":"2026-02-12T21:30:35.230Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/details"}
 {"date":"2026-02-12T21:31:25.791Z","level":"info","message":"Request received","method":"PUT","service":"user-service","url":"/vendor/details"}
+{"date":"2026-02-19T17:04:44.101Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2026-02-19T17:05:06.910Z","level":"info","message":"Request received","method":"GET","service":"user-service","url":"/vendor/details"}
+{"date":"2026-02-19T17:05:52.304Z","level":"info","message":"Request received","method":"POST","service":"user-service","url":"/auth/login"}
+{"date":"2026-02-19T17:06:00.694Z","level":"info","message":"Request received","method":"GET","service":"user-service","url":"/vendor/details"}

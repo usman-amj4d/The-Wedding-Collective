@@ -25,7 +25,7 @@ export const isAuthenticated = async (req, res, next) => {
           "Invalid token or you're not logged in",
           401,
           req,
-          res
+          res,
         );
 
       req.user = user;
@@ -33,64 +33,6 @@ export const isAuthenticated = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// ? check if the role is admin
-export const adminAuth = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: "Not logged in" });
-    }
-    if (req.user.role === "admin" || req.user.role === "mod") {
-      next();
-    } else {
-      return res.status(401).json({
-        success: false,
-        message:
-          "You're not an admin. You don't have the permissions to access this route",
-      });
-    }
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// ? check if the role is user
-export const userAuth = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: "Not logged in" });
-    }
-    if (req.user.role !== "user") {
-      return res.status(401).json({
-        success: false,
-        message:
-          "You're not a user. You don't have the permissions to access this route",
-      });
-    }
-    next();
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-// ? check if the role is user
-export const isVendor = async (req, res, next) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ success: false, message: "Not logged in" });
-    }
-    if (req.user.role !== "vendor") {
-      return res.status(401).json({
-        success: false,
-        message:
-          "You're not a vendor. You don't have the permissions to access this route",
-      });
-    }
-    next();
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorHandler(error.message, 500, req, res);
   }
 };

@@ -4,6 +4,17 @@ import shortId from "short-unique-id";
 import { getDataURI } from "../utils/dataUri.js";
 import { successHandler } from "../utils/successHandler.js";
 
+// ? constants
+export const VENDOR_MEDIA_LIMITS = {
+  photos: 15,
+  videos: 5,
+};
+
+export const PACKAGES_MEDIA_LIMITS = {
+  photos: 8,
+  videos: 2,
+};
+
 // ? generate referral code
 export const uniqueCode = async (length) => {
   try {
@@ -62,7 +73,7 @@ export const uploadMediaOnCloudinary = async (
   return uploadedImage;
 };
 
-// utils/cloudinary/deleteMedia.js
+// ? utils/cloudinary/deleteMedia.js
 export const deleteMediaFromCloudinary = async (
   mediaUrl,
   resourceType = "image",
@@ -88,7 +99,7 @@ export const deleteMediaFromCloudinary = async (
   });
 };
 
-// utils/cloudinary/deleteMultipleMedia.js
+// ? utils/cloudinary/deleteMultipleMedia.js
 export const deleteMultipleMediaFromCloudinary = async (
   mediaUrls = [],
   resourceType = "image",

@@ -1,11 +1,14 @@
 import express from "express";
 import * as vendorController from "../controllers/vendorController.js";
-import { isAuthenticated, isVendor } from "../middleware/auth.js";
+import { isAuthenticated } from "../middleware/auth.js";
+import { isVendor } from "../middleware/vendor.js";
+import { validateRequestBody } from "../middleware/app.js";
 import {
   multerErrorHandler,
   uploadImage,
   uploadMedia,
 } from "../middleware/multer.js";
+import { vendorSchema } from "../validators/vendorValidator.js";
 const router = express.Router();
 
 // ? GET
@@ -23,7 +26,14 @@ router
 // INFO: add vendor details
 router
   .route("/details")
-  .post(isAuthenticated, isVendor, vendorController.addVendorDetails);
+  .post(
+    isAuthenticated,
+    isVendor,
+    validateRequestBody(vendorSchema),
+    uploadImage,
+    multerErrorHandler,
+    vendorController.addVendorDetails,
+  );
 
 // INFO: add vendor package
 router
@@ -59,6 +69,15 @@ router.put(
   isVendor,
   uploadMedia,
   vendorController.uploadVendorMedia,
+);
+
+// INFO: upload package media (photos/videos)
+router.put(
+  "/packages/:packageId/upload/:type",
+  isAuthenticated,
+  isVendor,
+  uploadMedia,
+  vendorController.uploadVendorPackageMedia,
 );
 
 // ? DELETE
