@@ -23,15 +23,13 @@ const vendorPackageSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    addOns: {
-      type: [
-        {
-          name: String,
-          price: Number,
-        },
-      ],
-      default: [],
-    },
+    addOns: [
+      {
+        name: { type: String, required: true },
+        price: { type: Number, required: true },
+        description: { type: String },
+      },
+    ],
     features: {
       type: [String],
       default: [],

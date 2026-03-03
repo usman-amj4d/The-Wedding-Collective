@@ -5,6 +5,7 @@ import { apiError } from "./utils/apiError.js";
 import router from "./router/index.js";
 import loggerMiddleware from "./middleware/loggerMiddleware.js";
 import swaggerUi from "swagger-ui-express";
+import { errorHandler } from "./utils/errorHandler.js";
 
 // ? Generated Swagger file
 import * as swaggerFile from "../swagger_output.json" with { type: "json" };
@@ -46,16 +47,15 @@ app.use((err, req, res, next) => {
 
   if (err.code === 11000) {
     // Duplicate key
-    return res.status(409).json({
-      success: false,
-      message: "Duplicate value entered",
-    });
+    return errorHandler("Duplicate value entered", 409, req, res);
   }
 
-  return res.status(err.status || 500).json({
-    success: false,
-    message: err.message || "Server Error",
-  });
+  return errorHandler(
+    err.message || "Server Error",
+    err.status || 500,
+    req,
+    res,
+  );
 });
 
 export default app;

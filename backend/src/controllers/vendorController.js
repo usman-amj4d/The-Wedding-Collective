@@ -9,6 +9,11 @@ import {
   PACKAGES_MEDIA_LIMITS,
 } from "../functions/helperFunctions.js";
 import VendorPackage from "../models/Vendor/VendorPackage.js";
+import {
+  addAddOnSchema,
+  addVendorPackageSchema,
+  updateAddOnSchema,
+} from "../validators/vendorPackageValidator.js";
 
 // ? Vendor details APIS
 // INFO: get vendor details
@@ -378,39 +383,37 @@ export const getVendorPackages = async (req, res) => {
 export const addVendorPackage = async (req, res) => {
   // #swagger.tags = ['vendor', 'packages']
   try {
-    const { user, body } = req;
+    const { user, body, file } = req;
+
+    // ? Validating body
+    const validation = addVendorPackageSchema.safeParse(body);
+    if (!validation.success) {
+      const errors = validation.error.errors.map((e) => e.message);
+      return errorHandler(errors.join(", "), 400, req, res);
+    }
+
     const { packageName, description, price, features, category, addOns } =
       body;
-    const file = req.file;
 
-    if (
-      !packageName ||
-      !description ||
-      price === undefined ||
-      !features ||
-      !file
-    ) {
-      return errorHandler(
-        "Please provide package name, description, price, features, and cover photo",
-        400,
-        req,
-        res,
-      );
+    // ? Validate cover photo
+    if (!file) {
+      return errorHandler("Cover photo is required", 400, req, res);
+    }
+
+    // ? Restrict duplicate package names for the same vendor
+    const existingPackage = await VendorPackage.findOne({
+      vendor: vendor._id,
+      packageName: packageName.trim(),
+    });
+
+    if (existingPackage) {
+      return errorHandler("Package name already exists", 400, req, res);
     }
 
     // ? Find vendor
     const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
-    }
-
-    const existingPackage = await VendorPackage.findOne({
-      vendor: vendor._id,
-      packageName,
-    });
-
-    if (existingPackage) {
-      return errorHandler("Package name already exists", 400, req, res);
     }
 
     // ? Upload cover image
@@ -427,8 +430,8 @@ export const addVendorPackage = async (req, res) => {
       description: description.trim(),
       price,
       category,
-      addOns: addOns || [],
       features,
+      addOns: addOns || [],
       coverPhoto: uploadedFile.secure_url,
     });
 
@@ -514,48 +517,76 @@ export const uploadVendorPackageMedia = async (req, res) => {
   }
 };
 
-// INFO: Update package
+// INFO: Update vendor package
 export const updateVendorPackage = async (req, res) => {
-  // #swagger.tags = ['vendor']
+  // #swagger.tags = ['vendor', 'packages']
   try {
     const { user, params, body } = req;
     const { packageId } = params;
-    const { packageName, description, price, features } = body;
+    const { packageName, description, price, features, category, addOns } =
+      body;
     const file = req.file;
 
+    // ? Find vendor
     const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
       return errorHandler("Vendor details not found", 404, req, res);
     }
 
-    const pkg = vendor.packages.id(packageId);
+    // ? Find package
+    const pkg = await VendorPackage.findOne({
+      _id: packageId,
+      vendor: vendor._id,
+    });
+
     if (!pkg) {
       return errorHandler("Package not found", 404, req, res);
     }
 
-    if (packageName !== undefined) pkg.packageName = packageName;
-    if (description !== undefined) pkg.description = description;
+    // ? Prevent duplicate package name (if updating name)
+    if (packageName && packageName.trim() !== pkg.packageName) {
+      const existingPackage = await VendorPackage.findOne({
+        vendor: vendor._id,
+        packageName: packageName.trim(),
+      });
+
+      if (existingPackage) {
+        return errorHandler("Package name already exists", 400, req, res);
+      }
+
+      pkg.packageName = packageName.trim();
+    }
+
+    if (description !== undefined) pkg.description = description.trim();
     if (price !== undefined) pkg.price = price;
     if (features !== undefined) pkg.features = features;
+    if (category !== undefined) pkg.category = category;
 
-    // Update cover photo if a new file is uploaded
+    // ? Optional addOns (fully replace if provided)
+    if (addOns !== undefined) {
+      pkg.addOns = addOns;
+    }
+
+    // ? Update cover photo if new file uploaded
     if (file) {
-      // Delete old cover photo from Cloudinary
-      await deleteMediaFromCloudinary(pkg.coverPhoto);
+      if (pkg.coverPhoto) {
+        await deleteMediaFromCloudinary(pkg.coverPhoto);
+      }
 
-      // Upload new cover photo
       const uploadedFile = await uploadMediaOnCloudinary(
         file,
-        `vendors/${user._id}/packages/${packageName}`,
+        `vendors/${user._id}/packages`,
+        "image",
       );
+
       pkg.coverPhoto = uploadedFile.secure_url;
     }
 
-    await vendor.save();
+    await pkg.save();
 
     return successHandler(
       "Package updated successfully",
-      { packages: vendor.packages },
+      { package: pkg },
       200,
       res,
     );
@@ -571,23 +602,175 @@ export const deleteVendorPackage = async (req, res) => {
     const { user, params } = req;
     const { packageId } = params;
 
+    // ? Find vendor
     const vendor = await Vendor.findOne({ user: user._id });
     if (!vendor) {
-      return errorHandler("Vendor details not found", 404, req, res);
+      return errorHandler("Vendor not found", 404, req, res);
     }
-    const pkg = vendor.packages.id(packageId);
+
+    // ? Find package (must belong to this vendor)
+    const pkg = await VendorPackage.findOne({
+      _id: packageId,
+      vendor: vendor._id,
+    });
+
     if (!pkg) {
       return errorHandler("Package not found", 404, req, res);
     }
 
-    // Delete cover photo from Cloudinary
-    await deleteMediaFromCloudinary(pkg.coverPhoto);
-    pkg.remove();
-    await vendor.save();
+    // ? Delete cover photo
+    if (pkg.coverPhoto) {
+      await deleteMediaFromCloudinary(pkg.coverPhoto);
+    }
+
+    // ? Delete other media (if exists)
+    const allMedia = [...(pkg.photos || []), ...(pkg.videos || [])];
+
+    if (allMedia.length > 0) {
+      await deleteMultipleMediaFromCloudinary(allMedia);
+    }
+
+    // ? Delete document
+    await VendorPackage.deleteOne({ _id: pkg._id });
+
+    return successHandler("Package deleted successfully", null, 200, res);
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// ? Add-on APIS
+// INFO: Add add-on to package
+export const addAddOn = async (req, res) => {
+  try {
+    const { user, params, body } = req;
+    const { packageId } = params;
+
+    // ? Validate body
+    const validation = addAddOnSchema.safeParse(body);
+    if (!validation.success) {
+      const errors = validation.error.errors.map((e) => e.message);
+      return errorHandler(errors.join(", "), 400, req, res);
+    }
+
+    // ? Find vendor
+    const vendor = await Vendor.findOne({ user: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor not found", 404, req, res);
+    }
+
+    // ? Find package owned by vendor
+    const pkg = await VendorPackage.findOne({
+      _id: packageId,
+      vendor: vendor._id,
+    });
+
+    if (!pkg) {
+      return errorHandler("Package not found", 404, req, res);
+    }
+
+    // ? Push add-on
+    pkg.addOns.push(validation.data);
+
+    await pkg.save();
 
     return successHandler(
-      "Package deleted successfully",
-      { packages: vendor.packages },
+      "Add-on added successfully",
+      { package: pkg },
+      200,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: Update add-on
+export const updateAddOn = async (req, res) => {
+  try {
+    const { user, params, body } = req;
+    const { packageId, addOnId } = params;
+
+    // 1️⃣ Validate body
+    const validation = updateAddOnSchema.safeParse(body);
+    if (!validation.success) {
+      const errors = validation.error.errors.map((e) => e.message);
+      return errorHandler(errors.join(", "), 400, req, res);
+    }
+
+    // 2️⃣ Find vendor
+    const vendor = await Vendor.findOne({ user: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor not found", 404, req, res);
+    }
+
+    // 3️⃣ Find package
+    const pkg = await VendorPackage.findOne({
+      _id: packageId,
+      vendor: vendor._id,
+    });
+
+    if (!pkg) {
+      return errorHandler("Package not found", 404, req, res);
+    }
+
+    // 4️⃣ Find add-on
+    const addOn = pkg.addOns.id(addOnId);
+    if (!addOn) {
+      return errorHandler("Add-on not found", 404, req, res);
+    }
+
+    // 5️⃣ Update fields
+    Object.assign(addOn, validation.data);
+
+    await pkg.save();
+
+    return successHandler(
+      "Add-on updated successfully",
+      { package: pkg },
+      200,
+      res,
+    );
+  } catch (error) {
+    return errorHandler(error.message, 500, req, res);
+  }
+};
+
+// INFO: Delete add-on
+export const deleteAddOn = async (req, res) => {
+  try {
+    const { user, params } = req;
+    const { packageId, addOnId } = params;
+
+    // ? Find vendor
+    const vendor = await Vendor.findOne({ user: user._id });
+    if (!vendor) {
+      return errorHandler("Vendor not found", 404, req, res);
+    }
+
+    // ? Find package
+    const pkg = await VendorPackage.findOne({
+      _id: packageId,
+      vendor: vendor._id,
+    });
+
+    if (!pkg) {
+      return errorHandler("Package not found", 404, req, res);
+    }
+
+    // ? Remove add-on
+    const addOn = pkg.addOns.id(addOnId);
+    if (!addOn) {
+      return errorHandler("Add-on not found", 404, req, res);
+    }
+
+    addOn.deleteOne();
+
+    await pkg.save();
+
+    return successHandler(
+      "Add-on deleted successfully",
+      { package: pkg },
       200,
       res,
     );

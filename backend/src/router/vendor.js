@@ -40,6 +40,11 @@ router
   .route("/packages")
   .post(isAuthenticated, isVendor, vendorController.addVendorPackage);
 
+// INFO: add add-on to existing package
+router
+  .route("/packages/:packageId/addOn")
+  .post(isAuthenticated, isVendor, vendorController.addAddOn);
+
 // ? PUT
 // INFO: update vendor details
 router
@@ -80,6 +85,14 @@ router.put(
   vendorController.uploadVendorPackageMedia,
 );
 
+// INFO: update add-on details
+router.put(
+  "/packages/:packageId/addOn/:addOnId",
+  isAuthenticated,
+  isVendor,
+  vendorController.updateAddOn,
+);
+
 // ? DELETE
 // INFO: delete vendor media (photos/videos)
 router
@@ -90,5 +103,13 @@ router
 router
   .route("/packages/:packageId")
   .delete(isAuthenticated, isVendor, vendorController.deleteVendorPackage);
+
+// INFO: delete add-on from package
+router.delete(
+  "/packages/:packageId/addOn/:addOnId",
+  isAuthenticated,
+  isVendor,
+  vendorController.deleteAddOn,
+);
 
 export default router;
