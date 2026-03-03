@@ -1,4 +1,5 @@
 import Booking from "../models/Booking/Booking.js";
+import Transaction from "../models/Booking/Transaction.js";
 import Vendor from "../models/Vendor/Vendor.js";
 import VendorPackage from "../models/VendorPackage/VendorPackage.js";
 import { errorHandler } from "../utils/errorHandler.js";
@@ -95,6 +96,19 @@ export const createBooking = async (req, res) => {
       notes: notes?.trim(),
     });
 
+    const transaction = await Transaction.create({
+      booking: booking._id,
+      type: "payment",
+      amount: pkg.price,
+      currency: "GBP",
+      initiatedBy: "user",
+      user: user._id,
+      vendor: pkg.vendor._id,
+      provider: "stripe", // Assuming Stripe for payment processing
+      providerReference: `pi_${booking.bookingId}`, // Example reference, should be actual Stripe PaymentIntent ID
+      status: "pending",
+    });
+
     return successHandler(
       "Booking created successfully",
       { booking },
@@ -141,7 +155,7 @@ export const updateBookingByVendor = async (req, res) => {
     }
 
     // ? Allowed status transitions
-    const allowedStatuses = ["confirmed", "completed", "cancelled"];
+    const allowedStatuses = ["confirmed", "completed"];
 
     if (status !== undefined) {
       if (!allowedStatuses.includes(status)) {
